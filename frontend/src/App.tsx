@@ -8,12 +8,14 @@ export interface ContextType {
   email: string | null
   password: string | null
   username: string | null
+  token: string | null
 }
 
 const AppContext = createContext<ContextType>({
   email: null,
   password: null,
-  username: null
+  username: null,
+  token: null
 })
 
 const App = () => {
@@ -21,7 +23,8 @@ const App = () => {
     <AppContext.Provider value={{
       email: null,
       password: null,
-      username: null
+      username: null,
+      token: null
     }}>
       <Navbar />
       <Outlet></Outlet>
@@ -30,3 +33,4 @@ const App = () => {
 }
 
 export default App;
+export { AppContext }

@@ -1,3 +1,6 @@
 venv/
 .env
 backend/
+__pycache__/
+nohup.out
+*.db

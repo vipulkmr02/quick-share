@@ -1,16 +1,21 @@
+import { useContext } from "react"
+import { AppContext } from "./App"
+
 function Home() {
+  const context = useContext(AppContext)
+
   function signup() {
     const form$ = document.getElementById('signup-form')!
-    const name = form$?.querySelectorAll('input')[0].value
+    const username = form$?.querySelectorAll('input')[0].value
     const email = form$?.querySelectorAll('input')[1].value
     const password = form$?.querySelectorAll('input')[2].value
 
-    const body = { name: name, email: email, password: password }
-    console.log(body)
-    fetch('localhost:5000/signup', {
+    const body = { username: username, email: email, password: password }
+    fetch('http://localhost:8000/signup', {
       method: 'POST',
       body: JSON.stringify(body),
-    }).then(() => console.log("Signed Up!"))
+
+    })
   }
 
   function login() {
@@ -19,11 +24,13 @@ function Home() {
     const password = form$?.querySelectorAll('input')[1].value
 
     const body = { email: email, password: password }
-    console.log(body)
-    fetch('localhost:5000/login', {
+    fetch('https://localhost:8000/login', {
       method: 'POST',
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(body),
-    }).then(() => console.log("Logged In!"))
+    }).then(res => res.json()).then(({ token }) => context.token = token)
   }
 
   return <>
@@ -90,7 +97,7 @@ function Home() {
             </form>
           </div>
           <div className="modal-footer">
-            <button type='button' onClick={signup} className={"btn btn-primary " }>
+            <button type='button' onClick={signup} className={"btn btn-primary "}>
               Sign Up
             </button>
           </div>
