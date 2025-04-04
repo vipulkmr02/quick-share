@@ -1,8 +1,0 @@
-from django.urls import path
-from quickshare import views as api
-
-urlpatterns = [
-    path('login', api.login, name="Login"),
-    path('signup', api.signup, name="Signup"),
-    path('upload', api.upload_file, name="Upload File")
-]

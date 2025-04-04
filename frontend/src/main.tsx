@@ -22,6 +22,14 @@ const routes = createBrowserRouter([{
       element: <Home />
     },
     {
+      path: '/signup',
+      element: <Home modal='signup' />,
+    },
+    {
+      path: '/login',
+      element: <Home modal='login' />,
+    },
+    {
       path: '/files',
       element: <Files />
     },

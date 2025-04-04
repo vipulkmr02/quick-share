@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Link, useLocation } from "react-router"
+import '../node_modules/bootstrap/dist/js/bootstrap.min.js';
 
 export function Navbar() {
   return <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -28,34 +29,51 @@ export function Navbar() {
 
 export interface file {
   name: string
-  size: string
+  size: number
   owner: string
   type: string
+  isDir: boolean
 }
 
-export function FileGroup(opts: { files: file[] }) {
+export function File(opts: { file: file, view: 'list' | 'grid' }) {
+  const [options, showOptions] = useState(false);
 
-  const [selectedIndex, select] = useState(-1)
+  return <div onMouseEnter={() => showOptions(true)} onMouseLeave={() => showOptions(false)} className="card bg-body-secondary">
+    <div className="card-body">
+      <div className="d-flex file align-items-center flex-row gap-5">
+        <div className="fileIcon fs-4">
+          <span className="bi bi-file-earmark-fill"></span>
+        </div>
+        <div className="fileName fw-bold flex-grow-1">{opts.file.name}</div>
+        <div className="fileOptions d-flex gap-3">
+          <span className={`bi cursor-pointer bi-trash-fill opacity-${options ? 100 : 0}`}></span>
+        </div>
+        <div className="fileSize">{opts.file.size}</div>
+        <div className="fileOwner">{opts.file.owner}</div>
+      </div>
+    </div>
+  </div>
+}
 
+// export interface ToastOpts { id: string, title?: string, body: string, sub?: string };
+
+// export function Toast({ id, title, body, sub }: ToastOpts) {
+//   return <div id={id} className="toast show m-2" role="alert" aria-live="assertive" aria-atomic="true">
+//     <div className="toast-header">
+//       <strong className="me-auto">{title ?? "Notification"}</strong>
+//       <small>{sub ?? ""}</small>
+//       <button type="button" className="btn-close" data-bs-dismiss="toast" aria-label="Close"> </button>
+//     </div>
+//     <div className="toast-body"> {body} </div>
+//   </div>
+// }
+//
+// export function toast(opts: ToastOpts) {
+//   return bootstrap.Toast.getOrCreateInstance()
+// }
+
+export function PageTitle({ title }: { title: string }) {
   return <>
-    <ul className="list-group">
-      {
-        opts.files.map((file, index) => {
-          return <li key={index}
-            className={selectedIndex === index ? 'active' : ''}
-            onClick={() => select(index)}
-          >
-            <div className="container">
-              <div className="name">{file.name}</div>
-              <div className="size">{file.size}</div>
-              <div className="type">{file.type}</div>
-              <div className="owner">{file.owner}</div>
-            </div>
-          </li>
-        })
-      }
-    </ul>
-
+    <h1 className='my-3 display-3 fw-bold'> {title} </h1>
   </>
-
 }

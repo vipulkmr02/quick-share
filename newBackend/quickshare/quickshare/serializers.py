@@ -23,6 +23,12 @@ class UploadFileSerializer(serializers.ModelSerializer):
         fields = ['file']
 
 
+class UserInfoSerializer(serializers.Serializer):
+    email = serializers.CharField()
+    username = serializers.CharField()
+    fileCount = serializers.IntegerField()
+    dirCount = serializers.IntegerField()
+
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)

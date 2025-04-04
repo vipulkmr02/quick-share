@@ -25,13 +25,14 @@ def login(request):
     if serializer.is_valid():
         print(request)
         validated_data = serializer.validated_data
-        username = validated_data['username']
-        password = validated_data['password']
-        user = authenticate(request, username=username, password=password)
+        if validated_data is not None:
+            username = validated_data['username']
+            password = validated_data['password']
+            user = authenticate(request, username=username, password=password)
 
-        if user:
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key})
+            if user:
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({'token': token.key})
 
         else:
             return Response(
@@ -56,10 +57,26 @@ def upload_file(request):
     serializer = UploadFileSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save(uploaded_by=request.user)
+        breakpoint()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def user_info():
+    pass
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def storage_info(request):
+    fileCount = request.user.files()
+    return Response({"fileCount": fileCount})
+
+
 # @api_view(['GET'])
 # @permission_classes([IsAuthenticated])
 # def get_all_files(request):
