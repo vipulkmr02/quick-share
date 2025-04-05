@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 
 
 export function Navbar() {
-  return <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+  return <nav className="mb-2 navbar navbar-expand-lg navbar-dark bg-dark">
     <div className="container justify-content-between">
       <Link className="navbar-brand" to="/">Quick Share</Link>
       <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-expanded="false" aria-label="Toggle navigation">

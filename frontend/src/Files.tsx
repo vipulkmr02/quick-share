@@ -30,23 +30,19 @@ function Files() {
     return <Navigate to="/login" />
   }
 
-  return <div  className="container">
-    <div className="py-4 d-flex align-items-center flex-row justify-content-between">
-      <div>
-        <PageTitle title="Your Files" />
-      </div>
-      <div>
-        <UploadButton />
-      </div>
+  return <div className="container">
+    <div className="d-flex align-items-center flex-row justify-content-between">
+      <PageTitle title="Your Files" />
+      <UploadButton />
     </div>
 
-    <div style={{maxHeight: '70vh'}} className="p-2 overflow-y-scroll d-flex gap-2 flex-column ">
+    <div style={{ maxHeight: '70vh' }} className="mt-5 overflow-y-scroll d-flex gap-2 flex-column ">
       {files.map((x) => <File file={{
         name: x['file_name'],
         isDir: false,
         owner: appContext.fullname!,
         type: x['file_name'].split('.').slice(-1)[0]
-      }} view="list" key={x['id']}/>)}
+      }} view="list" key={x['id']} />)}
 
     </div>
   </div>
