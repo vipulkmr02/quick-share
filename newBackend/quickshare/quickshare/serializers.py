@@ -1,6 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import File
+from .models import File, Profile
+
+
+class UploadFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = File
+        fields = ('file',)
 
 
 class SignupSerializer(serializers.ModelSerializer):
@@ -17,10 +23,21 @@ class SignupSerializer(serializers.ModelSerializer):
         return user
 
 
-class UploadFileSerializer(serializers.ModelSerializer):
+class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = ['file']
+        fields = '__all__'
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = (
+            'full_name',
+            'dob',
+            'created_on',
+            'display_picture'
+        )
 
 
 class UserInfoSerializer(serializers.Serializer):
@@ -29,7 +46,7 @@ class UserInfoSerializer(serializers.Serializer):
     fileCount = serializers.IntegerField()
     dirCount = serializers.IntegerField()
 
+
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
-

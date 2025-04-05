@@ -1,6 +1,6 @@
-import "../node_modules/bootstrap/dist/css/bootstrap.min.css"
-import "../node_modules/bootstrap/dist/js/bootstrap.min.js"
-import "../node_modules/bootstrap-icons/font/bootstrap-icons.min.css"
+import "bootstrap/dist/css/bootstrap.min.css"
+import "bootstrap/dist/js/bootstrap.min.js"
+import "bootstrap-icons/font/bootstrap-icons.min.css"
 import { Outlet } from 'react-router-dom'
 import { Navbar } from "./components.js"
 import { ToastContainer } from "react-toastify"
@@ -19,7 +19,7 @@ const AppContext = createContext<ContextType>({
   email: null,
   username: null,
   fullname: null,
-  token: null,
+  token: localStorage.getItem('token'),
   fileCount: null,
   dirCount:  null
 })

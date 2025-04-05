@@ -1,6 +1,10 @@
-import { useState } from "react"
+import { useContext, useRef, useState } from "react"
 import { Link, useLocation } from "react-router"
 import '../node_modules/bootstrap/dist/js/bootstrap.min.js';
+import { AppContext } from "./App.js";
+import { upload } from "./utils.js";
+import { toast } from "react-toastify";
+
 
 export function Navbar() {
   return <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -29,7 +33,7 @@ export function Navbar() {
 
 export interface file {
   name: string
-  size: number
+  size?: number
   owner: string
   type: string
   isDir: boolean
@@ -48,7 +52,6 @@ export function File(opts: { file: file, view: 'list' | 'grid' }) {
         <div className="fileOptions d-flex gap-3">
           <span className={`bi cursor-pointer bi-trash-fill opacity-${options ? 100 : 0}`}></span>
         </div>
-        <div className="fileSize">{opts.file.size}</div>
         <div className="fileOwner">{opts.file.owner}</div>
       </div>
     </div>
@@ -75,5 +78,51 @@ export function File(opts: { file: file, view: 'list' | 'grid' }) {
 export function PageTitle({ title }: { title: string }) {
   return <>
     <h1 className='my-3 display-3 fw-bold'> {title} </h1>
+  </>
+}
+
+export function Error() {
+  return <div className="container"> <h1 className="display-1 ta-center fw-bold">Error!</h1> </div>
+}
+
+export function UploadButton() {
+  const context = useContext(AppContext);
+  const [file, setFile] = useState<File | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const mainBtn = useRef<HTMLButtonElement | null>(null);
+
+  const onFileChange = () => {
+    if (context.token && file)
+      return upload({ token: context.token, file: file })
+        .then(res => res.status === 201)
+    return new Promise((_resolve, reject) => { reject(null) });
+  }
+
+  const onFileSelection = () => {
+    mainBtn.current!.classList.remove('bg-success')
+    mainBtn.current!.classList.remove('bg-danger')
+    const element = inputRef.current as HTMLInputElement | null
+    const file = element ? element.files![0] : null;
+    setFile(file!)
+  }
+
+  return <>
+    <button ref={mainBtn} className="d-flex flex-column btn btn-secondary" onClick={
+      () => file ? onFileChange().then(uploadSuccess => {
+        if (uploadSuccess) {
+          toast.success("File Upload Successful!")
+          mainBtn.current!.classList.add('bg-success')
+          setFile(null);
+        } else {
+          toast.error("File Upload Unsuccessful!")
+          mainBtn.current!.classList.add('bg-danger')
+          setFile(null);
+        }
+      }) : inputRef.current ? inputRef.current.click() : 0}>
+      <i className="fs-1 bi bi-upload" />
+      <div className="fw-bold fs-5">{file ? "Upload" : "Select File"}</div>
+      {file && <div> File: <span className="align-bottom d-inline-block text-truncate" style={{ maxWidth: '100px' }}>{file.name}</span> </div>}
+      <input onChange={onFileSelection} type="file" ref={inputRef} className="d-none" />
+    </button>
   </>
 }

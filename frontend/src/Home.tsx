@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import 'bootstrap/dist/js/bootstrap.bundle.min'
 import { AppContext } from "./App"
 import { useNavigate } from "react-router-dom"
@@ -10,6 +10,7 @@ function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
   const loginModalRef = useRef(null)
   const signupModalRef = useRef(null)
   const navigate = useNavigate();
+  const [loggedIn, setLoggedIn] = useState(!!context.token);
 
   function signup() {
     const form$ = document.getElementById('signup-form')!
@@ -17,7 +18,11 @@ function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
     const email = form$?.querySelectorAll('input')[1].value
     const password = form$?.querySelectorAll('input')[2].value
 
-    const body = { username: username, email: email, password: password }
+    const body = {
+      username: username,
+      email: email,
+      password: password
+    }
     fetch('http://localhost:8000/signup', {
       method: 'POST',
       body: JSON.stringify(body),
@@ -25,33 +30,55 @@ function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
         "Accept": "*/*",
         "Content-Type": "application/json"
       },
-    })
+    }).then(res => res.json())
+      .then(json => {
+        return Object.create({
+          done: json.username === username && json.email === email,
+          json: json
+        })
+      }).then(response => {
+        if (response.done) {
+          toast.success("Signed UP successfully!")
+          // clicking closing btn
+          const closeBtn = document.getElementById("signupCloseBtn") as HTMLButtonElement
+          closeBtn.click()
+        } else {
+          for (const key of Object.keys(response.json)) {
+            toast.error(`${key.trim().toLocaleUpperCase()}: ${response.json[key]}`)
+          }
+        }
+      }).catch(err => console.error(err.message))
   }
 
   useEffect(() => {
-    if (modal === 'signup') {
-      const trigger = new window.bootstrap.Modal(signupModalRef.current)
-      trigger.show();
-    }
-    else if (modal === 'login') {
-      const trigger = new window.bootstrap.Modal(loginModalRef.current)
-      trigger.show();
-    }
+    if (modal === 'signup')
+      document.getElementById('signupTriggerBtn')!.click();
+    else if (modal === 'login')
+      document.getElementById('signupTriggerBtn')!.click();
+
   }, [modal])
 
   useEffect(() => {
-    if (loginModalRef.current)
+    const token = localStorage.getItem("token")
+    if (token) {
+      context.token = token
+      setLoggedIn(true)
+    }
+
+    // removing backdrops
+    if (loginModalRef.current) {
       loginModalRef.current.addEventListener('hidden.bs.modal', () => {
         document.querySelectorAll('.modal-backdrop').forEach(x => x.remove())
         navigate('/');
       });
+    }
 
     if (signupModalRef.current)
       signupModalRef.current.addEventListener('hidden.bs.modal', () => {
         document.querySelectorAll('.modal-backdrop').forEach(x => x.remove())
         navigate('/');
       });
-  })
+  }, [context, navigate])
 
   function login() {
     const form$ = document.getElementById('login-form')!
@@ -69,35 +96,28 @@ function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
     }).then(res => res.json())
       .then(({ token }) => {
         context.token = token
+        localStorage.setItem('token', token)
+        setLoggedIn(true);
         console.log("successfully logged in")
+        // close modal
+        const closeBtn = document.getElementById("loginCloseBtn") as HTMLButtonElement
+        closeBtn.click()
         toast.success("Logged IN!", { autoClose: 1000, hideProgressBar: true });
-        fetch('http://localhost:8000/info', {
-          method: "GET", headers: {
-            "Accept": "*/*",
-            "Content-Type": "application/json",
-            "Authorization": `Token ${token}`
-          }
-        }).then(res => res.json())
-          .then(data => {
-            context.email = data.email
-            context.username = data.username
-            context.fileCount = data.fileCount
-            context.dirCount = data.dirCount
-            navigate('/');
-          })
+        setLoggedIn(true)
       }).catch((err) => {
         console.error(err)
         toast.error("Something went wrong!")
       })
   }
 
+
   return <>
     <div className="container">
-      {!context.token ? <div>
+      {!loggedIn ? <div>
         <PageTitle title="Welcome to Quick Share" />
         <h3 className="display-7 ">Save your files on the cloud and Share</h3>
         <div className="d-flex w-50 m-auto justify-content-between">
-          <button type="button" data-bs-toggle="modal" data-bs-target="#loginModal"
+          <button id='loginTriggerBtn' type="button" data-bs-toggle="modal" data-bs-target="#loginModal"
             className="btn btn-primary"> Login </button>
           <button type="button" className="btn btn-primary"
             data-bs-toggle="modal" data-bs-target="#signupModal"> Signup </button>
@@ -106,12 +126,12 @@ function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
       </div> : <PageTitle title="Dashboard" />
       }
 
-      <div className={`modal fade`} ref={loginModalRef} id="loginModal" tabIndex={-1} aria-hidden="true">
+      {!loggedIn && <div className={`modal fade`} ref={loginModalRef} id="loginModal" tabIndex={-1} aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
               <h1 className="modal-title fs-5">Login</h1>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
+              <button type="button" id="loginCloseBtn" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
             </div>
             <div className="modal-body">
               <form id="login-form">
@@ -132,19 +152,20 @@ function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
             </div>
           </div>
         </div>
-      </div>
-      <div className={`modal fade`} ref={signupModalRef} id="signupModal" tabIndex={-1} aria-hidden="true">
+      </div>}
+
+      {!loggedIn && <div className={`modal fade`} ref={signupModalRef} id="signupModal" tabIndex={-1} aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
               <h1 className="modal-title fs-5">Signup</h1>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
+              <button type="button" id="signupCloseBtn" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
             </div>
             <div className="modal-body">
               <form id="signup-form">
                 <div className="mb-3">
-                  <label htmlFor="signup-fullname-input" className="form-label">Full Name</label>
-                  <input id='signup-fullname-input' type="text" className="form-control" placeholder='Raj Shamani' />
+                  <label htmlFor="signup-username-input" className="form-label">Username</label>
+                  <input id='signup-username-input' type="text" className="form-control" placeholder='raj' />
                 </div>
 
                 <div className="mb-3">
@@ -165,7 +186,14 @@ function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
             </div>
           </div>
         </div>
-      </div>
+      </div>}
+
+      {loggedIn &&
+        <div className="container p-0">
+          <h3>Hello, <em> {context.fullname ?? "Full Name"}</em></h3>
+          <h4>Recent Files</h4>
+        </div>}
+
     </div>
 
   </>
