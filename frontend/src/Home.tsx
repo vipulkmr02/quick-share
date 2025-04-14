@@ -3,14 +3,25 @@ import 'bootstrap/dist/js/bootstrap.bundle.min'
 import { AppContext } from "./App"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
-import { PageTitle } from "./components"
+import { PageTitle, File } from "./components"
 
 function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
-  const context = useContext(AppContext)
-  const loginModalRef = useRef(null)
-  const signupModalRef = useRef(null)
+  const appContext = useContext(AppContext)
+  const loginModalRef = useRef<HTMLDivElement>(null)
+  const [publicFiles, setPublicFiles] = useState<{ [x: string]: string }[]>([]);
+  const signupModalRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate();
-  const [loggedIn, setLoggedIn] = useState(!!context.token);
+  const [loggedIn, setLoggedIn] = useState(!!appContext.token);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/files', {
+      method: 'GET',
+    }).then(res => {
+      if (res.ok) return res.json()
+      throw 'Failed to fetch files'
+    }).then(json => setPublicFiles(json))
+      .then(() => { console.log("Fetched public files") })
+  }, [setPublicFiles])
 
   function signup() {
     const form$ = document.getElementById('signup-form')!
@@ -39,7 +50,6 @@ function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
       }).then(response => {
         if (response.done) {
           toast.success("Signed UP successfully!")
-          // clicking closing btn
           const closeBtn = document.getElementById("signupCloseBtn") as HTMLButtonElement
           closeBtn.click()
         } else {
@@ -50,22 +60,17 @@ function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
       }).catch(err => console.error(err.message))
   }
 
-  useEffect(() => {
-    if (modal === 'signup')
-      document.getElementById('signupTriggerBtn')!.click();
-    else if (modal === 'login')
-      document.getElementById('signupTriggerBtn')!.click();
-
-  }, [modal])
+  useEffect(() => modal && document.querySelector<HTMLButtonElement>(
+    `#${modal}Btn`
+  )!.click(), [modal])
 
   useEffect(() => {
     const token = localStorage.getItem("token")
     if (token) {
-      context.token = token
+      appContext.token = token
       setLoggedIn(true)
     }
 
-    // removing backdrops
     if (loginModalRef.current) {
       loginModalRef.current.addEventListener('hidden.bs.modal', () => {
         document.querySelectorAll('.modal-backdrop').forEach(x => x.remove())
@@ -78,7 +83,7 @@ function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
         document.querySelectorAll('.modal-backdrop').forEach(x => x.remove())
         navigate('/');
       });
-  }, [context, navigate])
+  }, [appContext, navigate])
 
   function login() {
     const form$ = document.getElementById('login-form')!
@@ -95,11 +100,10 @@ function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
       body: JSON.stringify(body),
     }).then(res => res.json())
       .then(({ token }) => {
-        context.token = token
+        appContext.token = token
         localStorage.setItem('token', token)
         setLoggedIn(true);
         console.log("successfully logged in")
-        // close modal
         const closeBtn = document.getElementById("loginCloseBtn") as HTMLButtonElement
         closeBtn.click()
         toast.success("Logged IN!", { autoClose: 1000, hideProgressBar: true });
@@ -117,9 +121,9 @@ function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
         <PageTitle title="Welcome to Quick Share" />
         <h3 className="display-7 ">Save your files on the cloud and Share</h3>
         <div className="d-flex w-50 m-auto justify-content-between">
-          <button id='loginTriggerBtn' type="button" data-bs-toggle="modal" data-bs-target="#loginModal"
+          <button id='loginBtn' type="button" data-bs-toggle="modal" data-bs-target="#loginModal"
             className="btn btn-primary"> Login </button>
-          <button type="button" className="btn btn-primary"
+          <button type="button" className="btn btn-primary" id="signupBtn"
             data-bs-toggle="modal" data-bs-target="#signupModal"> Signup </button>
         </div>
 
@@ -189,13 +193,44 @@ function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
       </div>}
 
       {loggedIn &&
-        <div className="container p-0">
-          <h3>Hello, <em> {context.fullname ?? "Full Name"}</em></h3>
-          <h4>Recent Files</h4>
-        </div>}
+        <>
+          <div className="container p-0">
+            <h3>Hello, <strong> {JSON.parse(localStorage.getItem('user-info') ?? '{}').profile.full_name ?? "Full Name"}</strong></h3>
+            <h4>Welcome to <strong>Quick Share</strong>. Upload & Share files Anywhere.</h4>
+          </div>
 
+          <div className="container p-0 mt-5">
+            <div className="d-flex justify-content-between align-items-center">
+              <div> <h3>Public Files</h3> </div>
+              <div className="input-group flex-grow-0 w-25">
+                <span className="input-group-text" >Search Files</span>
+                <input type="text" name='search-bar' id='search-bar' className="form-control" />
+              </div>
+            </div>
+
+            <div className="d-flex">
+              <div style={{ minHeight: '75vh' }} className="list-group mt-2 overflow-y-auto d-flex gap-2 flex-column w-100 p-2">
+                {Array.isArray(publicFiles) && publicFiles.length !== 0 ? publicFiles.map((x) => <File file={{
+                  id: x['id'],
+                  name: x['file_name'],
+                  isDir: false,
+                  owner: appContext.fullname!,
+                  uuid: x['uuid'],
+                  public: true,
+                  type: x['file_name'].split('.').slice(-1)[0],
+                }} view="grid" key={x['id']} />)
+                  : <div className="d-flex flex-column position-relative top-50 start-50 translate-middle text-center">
+                    <i className="bi bi-ban fs-1 text-secondary" />
+                    <h3 className="text-secondary">
+                      No Public Files!
+                    </h3>
+                  </div>}
+              </div>
+            </div>
+          </div>
+        </>
+      }
     </div>
-
   </>
 }
 

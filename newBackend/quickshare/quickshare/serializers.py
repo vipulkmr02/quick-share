@@ -9,6 +9,31 @@ class UploadFileSerializer(serializers.ModelSerializer):
         fields = ('file',)
 
 
+class ChangeCredsSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    email = serializers.CharField()
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exclude(pk=self.context['request'].user.pk).exists():
+            raise serializers.ValidationError(
+                "This username is already taken.")
+        return value
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exclude(pk=self.context['request'].user.pk).exists():
+            raise serializers.ValidationError(
+                "This email is already in use.")
+        return value
+
+    def update(self, instance, validated_data):
+        if 'username' in validated_data:
+            instance.username = validated_data['username']
+        if 'email' in validated_data:
+            instance.email = validated_data['email']
+        instance.save()
+        return instance
+
+
 class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -32,19 +57,15 @@ class FileSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = (
-            'full_name',
-            'dob',
-            'created_on',
-            'display_picture'
-        )
+        fields = ['full_name', 'dob', 'created_on', 'display_picture']
 
 
-class UserInfoSerializer(serializers.Serializer):
-    email = serializers.CharField()
-    username = serializers.CharField()
-    fileCount = serializers.IntegerField()
-    dirCount = serializers.IntegerField()
+class UserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'profile']
+
+    profile = ProfileSerializer(read_only=True)
 
 
 class LoginSerializer(serializers.Serializer):
