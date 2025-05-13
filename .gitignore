@@ -1,6 +1,5 @@
 venv/
 .env
-backend/
 __pycache__/
 *.out
 *.sqlite3

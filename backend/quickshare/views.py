@@ -25,7 +25,9 @@ from .models import File
 
 
 # INFO: url: /
-def welcome() -> Response:
+@api_view(["GET"])
+@permission_classes([])
+def welcome(request: Request) -> Response:
     return Response({"message": "Welcome to QuickShare API"},
                     status=status.HTTP_200_OK)
 
@@ -78,6 +80,19 @@ def auth(request):
         )
     return Response({"message": "Authorized"},
                     status=status.HTTP_401_UNAUTHORIZED)
+
+
+# NOTE: url: /delete-token
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_token(request: Request) -> Response:
+    breakpoint()
+    request.user.auth_token.delete()
+    return Response(
+        { "message": "Logged out successfully" },
+        status=status.HTTP_200_OK,
+    )
 
 
 # NOTE: url: /files
@@ -332,4 +347,3 @@ def private_download(request, uuid):
         as_attachment=True,
         filename=File.objects.get(file_uuid=uuid).file_name,
     )
-

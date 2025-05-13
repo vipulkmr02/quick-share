@@ -9,7 +9,7 @@ function Files() {
   const appContext = useContext(AppContext);
   appContext.token = localStorage.getItem('token');
 
-  const [_uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [shown, setShown] = useState(false);
   const [files, setFiles] = useState<{ [x: string]: string }[] | null>([]);
   const [fileUpdate, updateFiles] = useState(false);
@@ -41,15 +41,6 @@ function Files() {
           if (data.message !== 'No Files Found') setFiles(data)
         })
   }, [fileUpdate, appContext])
-
-  if (!appContext.token) {
-    console.warn("not logged in, redirecting to /")
-    if (!shown) {
-      setShown(true)
-      toast.error("You are not logged in!", { autoClose: 2000 })
-    }
-    return <Navigate to="/login" />
-  }
 
   return <div className="container mt-0">
     <div className="d-flex flex-wrap align-items-center flex-row justify-content-between justify-content-center">

@@ -6,6 +6,7 @@ urlpatterns = [
     path('login', api.login, name="Login"),
     path('signup', api.signup, name="Signup"),
     path('authorized', api.auth, name="Authorized"),
+    path('delete-token', api.delete_token, name="Delete Token"),
 
     path('file', api.file, name="File"),
     path('files', api.files, name="Public Files"),

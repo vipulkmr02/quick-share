@@ -49,7 +49,7 @@ const routes = createBrowserRouter([{
               if (!profileToast) {
                 profileToast = true;
                 toast.error('Please fill all your details.')
-                window.location.pathname !== '/profile' && window.location.replace('/profile')
+                if (window.location.pathname !== '/profile') window.location.replace('/profile')
               }
             } else {
               localStorage.setItem('user-info', JSON.stringify(json))
@@ -79,6 +79,15 @@ const routes = createBrowserRouter([{
     {
       path: '/profile',
       element: <Profile />
+    },
+    {
+      path: '/logout',
+      loader: () => {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user-info')
+        toast.success('Logged out successfully.')
+        window.location.replace('/')
+      }
     }
 
   ]

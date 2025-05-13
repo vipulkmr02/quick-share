@@ -119,14 +119,15 @@ function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
     <div className="container">
       {!loggedIn ? <div>
         <PageTitle title="Welcome to Quick Share" />
-        <h3 className="display-7 ">Save your files on the cloud and Share</h3>
-        <div className="d-flex w-50 m-auto justify-content-between">
+        <div className="d-flex fs-5 w-50 justify-content-start">
+          Quickshare is an easy file sharing service. that allows you to share large files via a link. Just create an account and upload your file you want to share you will get link for each file you upload. With this link anybody can download your file.
+        </div>
+        <div className="mt-4 d-flex w-50 m-auto justify-content-between">
           <button id='loginBtn' type="button" data-bs-toggle="modal" data-bs-target="#loginModal"
             className="btn btn-primary"> Login </button>
           <button type="button" className="btn btn-primary" id="signupBtn"
-            data-bs-toggle="modal" data-bs-target="#signupModal"> Signup </button>
+            data-bs-toggle="modal" data-bs-target="#signupModal"> Create Account </button>
         </div>
-
       </div> : <PageTitle title="Dashboard" />
       }
 
@@ -203,8 +204,7 @@ function Home({ modal }: { modal?: undefined | 'login' | 'signup' }) {
             <div className="d-flex justify-content-between align-items-center">
               <div> <h3>Public Files</h3> </div>
               <div className="input-group flex-grow-0 w-25">
-                <span className="input-group-text" >Search Files</span>
-                <input type="text" name='search-bar' id='search-bar' className="form-control" />
+                <input placeholder="Search files..." type="text" name='search-bar' id='search-bar' className="form-control" />
               </div>
             </div>
 
