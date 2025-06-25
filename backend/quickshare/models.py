@@ -6,7 +6,8 @@ from django.conf import settings
 class File(models.Model):
     file = models.FileField(upload_to="files/")
     file_name = models.CharField(max_length=50, blank=True)
-    file_uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    file_uuid = models.UUIDField(
+        default=uuid.uuid4, unique=True, editable=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     description = models.CharField(max_length=255, blank=True)
     public = models.BooleanField(default=False)

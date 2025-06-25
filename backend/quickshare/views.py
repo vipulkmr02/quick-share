@@ -21,7 +21,7 @@ from .serializers import (
     ChangeCredsSerializer,
     UserInfoSerializer,
 )
-from .models import File
+from .models import File, Profile
 
 
 # INFO: url: /
@@ -78,7 +78,7 @@ def auth(request):
             {"message": "Authorized"},
             status=status.HTTP_200_OK,
         )
-    return Response({"message": "Authorized"},
+    return Response({"message": "Unauthorized"},
                     status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -281,12 +281,13 @@ def profile(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def dp(request):
-    if 'display_picture' in dir(request.user.profile):
-        return Response(
-            {"message": "Display Picture does not exists."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-    return FileResponse(open(request.user.profile.display_picture.path, "rb"))
+    profile = Profile.objects.get(user=request.user)
+    if 'display_picture' in dir(profile):
+        return FileResponse(open(request.user.profile.display_picture.path, "rb"))
+    return Response(
+        {"message": "Display Picture does not exists."},
+        status=status.HTTP_400_BAD_REQUEST,
+    )
 
 
 # NOTE: url: /download/<uuid>

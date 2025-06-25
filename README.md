@@ -1,8 +1,11 @@
 # QuickShare
 
-This is a React + Django application. It allows users to upload and share files.
+This is a React + Django application. It allows users to upload and share
+files on the web 🌐 anonymously.
 
-<!-- ## !Important Please Ignore the security warning on the browser, -->
-<!-- ## It's only because the certificate is self-signed. -->
+## 🚀 Highlights:
 
+- Share files anywhere.
+- Anonymously sharing of files.
+- Bootstrap UI.
 
